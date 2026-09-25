@@ -14,4 +14,4 @@ async def hello(name: str):
     return {"message": f"Hello, {name}!"}
 
 
-handler = Mangum(app, lifespan="off")
+Test_function_1 = Mangum(app, lifespan="off")
