@@ -21,16 +21,15 @@ jobs:
         run: |
           cd Test-Scripts/lambda-API
           
-          rm -rf package_root
-          mkdir -p package_root
+          # Install dependencies directly into the current folder
+          pip install --no-cache-dir -r requirements.txt -t .
           
-          # Now pip will correctly install exceptiongroup for Python 3.10
-          pip install --no-cache-dir -r requirements.txt -t package_root/
+          # Remove any old zip if it exists
+          rm -f ../../deployment.zip
           
-          cp app.py package_root/
+          # Create a fresh zip of everything (app.py + all installed packages) at the repo root
+          zip -r ../../deployment.zip .
           
-          cd package_root
-          zip -r ../../../deployment.zip .
           cd ../../..
 
       - name: Configure AWS Credentials
