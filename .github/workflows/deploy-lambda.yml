@@ -1,0 +1,41 @@
+name: Build and Deploy to AWS Lambda
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11' # Match your Lambda runtime version
+
+      - name: Install Dependencies & Package
+        run: |
+          mkdir -p deployment_package
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt -t deployment_package/
+          fi
+          cp *.py deployment_package/
+          cd deployment_package
+          zip -r ../deployment.zip .
+          cd ..
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 # Change to your actual AWS region (e.g., ap-south-1)
+
+      - name: Update Lambda Function Code
+        run: |
+          aws lambda update-function-code \
+            --function-name Test_function_1 \
+            --zip-file fileb://deployment.zip
