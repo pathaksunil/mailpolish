@@ -19,10 +19,17 @@ jobs:
       - name: Install Dependencies & Package
         run: |
           mkdir -p deployment_package
+          
+          # Install dependencies if requirements.txt exists
           if [ -f requirements.txt ]; then
             pip install -r requirements.txt -t deployment_package/
           fi
-          cp *.py deployment_package/
+          
+          # Copy all Python files recursively into the deployment package, 
+          # excluding virtual environments and hidden directories
+          find . -type f -name "*.py" ! -path "./.venv/*" ! -path "./venv/*" -exec cp --parents {} deployment_package/ \;
+          
+          # Flatten or navigate if needed, then zip the package contents
           cd deployment_package
           zip -r ../deployment.zip .
           cd ..
