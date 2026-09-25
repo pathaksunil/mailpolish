@@ -18,25 +18,22 @@ jobs:
 
       - name: Install Dependencies & Package
         run: |
-          # Navigate into the exact folder where app.py and requirements.txt live
           cd Test-Scripts/lambda-API
           
-          # Create a clean packaging directory
+          # Clean up any old build files
+          rm -rf package_root
           mkdir -p package_root
           
-          # Install dependencies into the root
-          if [ -f requirements.txt ]; then
-            pip install -r requirements.txt -t package_root/
-          fi
+          # Install fastapi, mangum, and all their sub-dependencies into package_root
+          pip install --no-cache-dir -r requirements.txt -t package_root/
           
-          # Copy app.py directly into the package root
+          # Copy app.py into package_root
           cp app.py package_root/
           
-          # Zip the contents of package_root so app.py sits at the top level of the zip
+          # Zip everything from inside package_root so everything sits at the root of the zip
           cd package_root
           zip -r ../../../deployment.zip .
           cd ../../..
-
 
 
       - name: Configure AWS Credentials
