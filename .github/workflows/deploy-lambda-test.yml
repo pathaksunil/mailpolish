@@ -19,18 +19,22 @@ jobs:
 
       - name: Install Dependencies & Package
         run: |
-          cd Test-Scripts/lambda-API
+          # Create a clean isolated staging folder at the root
+          mkdir -p lambda_build
           
-          # Install dependencies directly into the current folder
-          pip install --no-cache-dir -r requirements.txt -t .
+          # Install dependencies into the staging folder using Python 3.10
+          pip install --no-cache-dir -r Test-Scripts/lambda-API/requirements.txt -t lambda_build/
           
-          # Remove any old zip if it exists
-          rm -f ../../deployment.zip
+          # Copy app.py explicitly into the root of the staging folder
+          cp Test-Scripts/lambda-API/app.py lambda_build/
           
-          # Create a fresh zip of everything (app.py + all installed packages) at the repo root
-          zip -r ../../deployment.zip .
+          # Remove any old zip
+          rm -f deployment.zip
           
-          cd ../../..
+          # Zip the contents of the staging folder so everything sits cleanly at the root
+          cd lambda_build
+          zip -r ../deployment.zip .
+          cd ..
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
