@@ -1,47 +1,44 @@
-name: Build and Deploy to AWS Lambda
+name: Deploy Lambda Test
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      # 1. Force GitHub Actions to use Python 3.10 (matching AWS Lambda)
+      - name: Set up Python 3.10
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # Match your Lambda runtime version
+          python-version: "3.10"
 
       - name: Install Dependencies & Package
         run: |
           cd Test-Scripts/lambda-API
           
-          # Clean up any old build files
           rm -rf package_root
           mkdir -p package_root
           
-          # Install fastapi, mangum, and all their sub-dependencies into package_root
+          # Now pip will correctly install exceptiongroup for Python 3.10
           pip install --no-cache-dir -r requirements.txt -t package_root/
           
-          # Copy app.py into package_root
           cp app.py package_root/
           
-          # Zip everything from inside package_root so everything sits at the root of the zip
           cd package_root
           zip -r ../../../deployment.zip .
           cd ../../..
-
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1 # Change to your actual AWS region (e.g., ap-south-1)
+          aws-region: us-east-1 # Change to your AWS region if different
 
       - name: Update Lambda Function Code
         run: |
