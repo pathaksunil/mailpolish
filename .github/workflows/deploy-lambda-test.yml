@@ -18,21 +18,26 @@ jobs:
 
       - name: Install Dependencies & Package
         run: |
-          mkdir -p deployment_package
+          # Navigate into the exact folder where app.py and requirements.txt live
+          cd Test-Scripts/lambda-API
           
-          # Install dependencies if requirements.txt exists
+          # Create a clean packaging directory
+          mkdir -p package_root
+          
+          # Install dependencies into the root
           if [ -f requirements.txt ]; then
-            pip install -r requirements.txt -t deployment_package/
+            pip install -r requirements.txt -t package_root/
           fi
           
-          # Copy all Python files recursively into the deployment package, 
-          # excluding virtual environments and hidden directories
-          find . -type f -name "*.py" ! -path "./.venv/*" ! -path "./venv/*" -exec cp --parents {} deployment_package/ \;
+          # Copy app.py directly into the package root
+          cp app.py package_root/
           
-          # Flatten or navigate if needed, then zip the package contents
-          cd deployment_package
-          zip -r ../deployment.zip .
-          cd ..
+          # Zip the contents of package_root so app.py sits at the top level of the zip
+          cd package_root
+          zip -r ../../../deployment.zip .
+          cd ../../..
+
+
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
