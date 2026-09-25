@@ -36,6 +36,15 @@ jobs:
           zip -r ../deployment.zip .
           cd ..
 
+
+        # 👇 ADD THIS STEP TO CHECK THE ZIP STRUCTURE IN LOGS 👇
+      - name: Verify Zip Contents
+        run: |
+          echo "=== Contents of deployment.zip ==="
+          unzip -l deployment.zip
+          echo "=================================="
+
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
