@@ -19,25 +19,20 @@ jobs:
 
       - name: Install Dependencies & Package
         run: |
-          # Create a clean isolated staging folder at the root
-          mkdir -p lambda_build
+          cd Test-Scripts/lambda-API
           
-          # Install dependencies into the staging folder using Python 3.10
-          pip install --no-cache-dir -r Test-Scripts/lambda-API/requirements.txt -t lambda_build/
+          # Remove any old zip package
+          rm -f ../../deployment.zip
           
-          # Copy app.py explicitly into the root of the staging folder
-          cp Test-Scripts/lambda-API/app.py lambda_build/
+          # Install dependencies locally into this folder so they are included
+          pip install --no-cache-dir -r requirements.txt -t .
           
-          # Remove any old zip
-          rm -f deployment.zip
+          # Zip everything in this folder directly into the root of the repo
+          zip -r ../../deployment.zip .
           
-          # Zip the contents of the staging folder so everything sits cleanly at the root
-          cd lambda_build
-          zip -r ../deployment.zip .
-          cd ..
+          cd ../../..
 
-
-        # 👇 ADD THIS STEP TO CHECK THE ZIP STRUCTURE IN LOGS 👇
+      # 👇 ADD THIS STEP TO CHECK THE ZIP STRUCTURE IN LOGS 👇
       - name: Verify Zip Contents
         run: |
           echo "=== Contents of deployment.zip ==="
